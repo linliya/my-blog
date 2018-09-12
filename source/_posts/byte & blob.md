@@ -7,9 +7,12 @@ blob, 即binary large object，二进制大对象，MDN上的定义是:
 
 Blob 对象表示一个二进制文件的数据内容,可以看做是存放二进制数据的容器，一直以来，JS都没有比较好的可以直接处理二进制的方法。而Blob的出现，使我们可以通过JS直接操作二进制数据
 
+> 拓展: MySql/Oracle数据库中，有一种Blob类型，专门存放二进制数据
+
+
 ### 构建blob对象的方式
 
-#### 1. Blob构造函数
+#### Blob构造函数
 ```
 new Blob(array [, options])
 ```
@@ -23,14 +26,10 @@ var blob = new Blob([ JSON.stringify(obj) ], {type : 'application/json'});
 Blob具有两个实例属性size和type，分别返回数据的大小和类型。
 > 数据类型参见[MIME类型](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types)
 
-#### 2. BlobBuilder
-```
-let bb = new BlobBuilder()
-# 可以添加strings, arrayBuffers 或者 Blobs
-bb.append('hello')
-# 通过getBlob方法得到blob对象
-let blob = bb.getBlob('text/plain')
-```
+- slice方法
+可以实现大文件的[分片上传](https://scarletsky.github.io/2015/01/27/javascript-upload-slice-file-using-blob/)
+> slice() 方法接受三个参数，起始偏移量，结束偏移量，还有可选的 mime 类型。如果 mime 类型，没有设置，那么新的 Blob 对象的 mime 类型和父级一样
+
 
 ###  File对象
 文件(File) 接口提供有关文件的信息，并允许网页中的 JavaScript 访问其内容
@@ -75,12 +74,32 @@ element.ondrop = (e) => {
 - FileReader.abort()
 > 中止读取操作。在返回时，readyState属性为DONE
 
+例子: 用户上传文件后预览
+
 ### Buffer对象
 Buffer对象是Node处理二进制数据的一个接口。它是Node原生提供的全局对象，可以直接使用，不需要require('buffer')
 
 ### ArrayBuffer 对象 & TypedArray视图 & Dataview视图
-ArrayBuffer对象代表原始的二进制数据，TypedArray 视图用来读写简单类型的二进制数据，DataView视图用来读写复杂类型的二进制数据。
+简单来说，ArrayBuffer是装着二进制数据的对象， [ArrayBuffer](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)对象代表原始的二进制数据，[TypedArray](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) 视图用来读写简单类型的二进制数据，[DataView](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/DataView)视图用来读写复杂类型的二进制数据。
 ArrayBuffer 不能直接操作，而是要通过TypedArray对象或 DataView 对象来操作
+
+```
+// 创建一个8字节的ArrayBuffer  
+var b = new ArrayBuffer(8);  
+  
+// 创建一个指向b的视图v1，采用Int32类型，开始于默认的字节索引0，直到缓冲区的末尾  
+var v1 = new Int32Array(b);  
+  
+// 创建一个指向b的视图v2，采用Uint8类型，开始于字节索引2，直到缓冲区的末尾  
+var v2 = new Uint8Array(b, 2);  
+  
+// 创建一个指向b的视图v3，采用Int16类型，开始于字节索引2，长度为2  
+var v3 = new Int16Array(b, 2, 2);  
+```
+
+上面代码里变量的数据结构如下表所示：
+![](https://user-gold-cdn.xitu.io/2018/9/12/165cc5d7d759e61d?w=846&h=470&f=png&s=33252)
+
 
 ### URL对象
 调用 URL 对象的 createObjectURL 方法，传入一个 File 对象或者 Blob 对象，能生成一个链接
@@ -155,7 +174,27 @@ function uploadFiles (url, files) {
 
 ```
 
-#### 4. blob <=> indexedDB
+#### 4. web => blob => dom
+从服务器下载一张图片并显示
+```
+var xhr = new XMLHttpRequest()
+xhr.open('get', '1.jpg', true)
+xhr.responseType = 'blob'
+xhr.onload = function() {
+  if (this.status == 200) {
+    var blob = this.response
+    var img = document.createElement('img')
+    img.onload = function(e) {
+      window.URL.revokeObjectURL(img.src)
+    }
+    img.src = window.URL.createObjectURL(blob)
+    eleAppend.appendChild(img)
+  }
+}
+xhr.send()
+```
+
+#### 5. blob <=> indexedDB
 ```
 # blob => indexedDB
 store.put(blob)
@@ -166,7 +205,7 @@ request.onsuccess = function () {
 }
 ```
 
-#### 5. blob <=> worker
+#### 6. blob <=> worker
 
 ```
 worker.postMessage(blob)
@@ -174,5 +213,3 @@ worker.onmessage = function (e) {
   let blob = e.data
 }
 ```
-
-拓展: MySql/Oracle数据库中，有一种Blob类型，专门存放二进制数据
