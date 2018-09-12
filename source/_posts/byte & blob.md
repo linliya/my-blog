@@ -1,4 +1,9 @@
 
+---
+title: bytes & blob
+date: 2018-09-12 14:57:10
+tags:
+---
 ![](https://user-gold-cdn.xitu.io/2018/9/11/165c9258d942a92f?w=1456&h=998&f=jpeg&s=285954)
 ### blob是什么？
 
