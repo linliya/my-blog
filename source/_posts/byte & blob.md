@@ -1,10 +1,9 @@
-
 ---
 title: bytes & blob
 date: 2018-09-12 14:57:10
 tags:
 ---
-![](https://user-gold-cdn.xitu.io/2018/9/11/165c9258d942a92f?w=1456&h=998&f=jpeg&s=285954)
+
 ### blob是什么？
 
 blob, 即binary large object，二进制大对象，MDN上的定义是:
@@ -48,12 +47,15 @@ not all blobs are files(不是所有的blobs对象都是file对象)
 #### 1. 怎么拿到一个file对象？
 - input 输入框
 ```
-<input type="file" @change="getFile">
-
-function getFile (e) {
-  let file = e.target.files[0]
-  console.log(file)
-}
+<input type="file" onChange="display(event)">
+  <img id="img"/>
+  function display(e) {
+    let img = document.getElementById('img')
+    img.src = URL.createObjectURL(e.target.files[0])
+    img.onload = function () {
+      URL.revokeObjectURL(this.src)
+    }
+  }
 ```
 - drag and drop 拖放
 ```
@@ -70,26 +72,23 @@ element.ondrop = (e) => {
 - `file.lastModifiedDate` 文件最后修改时间
 
 #### 3. 拿到file对象后如何处理?
-- FileReader.readAsArrayBuffer()
+- FileReader.readAsArrayBuffer(Blob | File)
 > 开始读取指定的 Blob中的内容, 一旦完成, result 属性中保存的将是被读取文件的 ArrayBuffer 数据对象
-- FileReader.readAsDataURL()
+- FileReader.readAsDataURL(Blob | File)
 > 开始读取指定的Blob中的内容。一旦完成，result属性中将包含一个data: URL格式的字符串以表示所读取文件的内容。
-- FileReader.readAsText()
+- FileReader.readAsText(Blob | File)
 > 开始读取指定的Blob中的内容。一旦完成，result属性中将包含一个字符串以表示所读取的文件内容。
 - FileReader.abort()
 > 中止读取操作。在返回时，readyState属性为DONE
 
 例子: 用户上传文件后预览
 
-### Buffer对象
-Buffer对象是Node处理二进制数据的一个接口。它是Node原生提供的全局对象，可以直接使用，不需要require('buffer')
-
 ### ArrayBuffer 对象 & TypedArray视图 & Dataview视图
 简单来说，ArrayBuffer是装着二进制数据的对象， [ArrayBuffer](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)对象代表原始的二进制数据，[TypedArray](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) 视图用来读写简单类型的二进制数据，[DataView](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/DataView)视图用来读写复杂类型的二进制数据。
 ArrayBuffer 不能直接操作，而是要通过TypedArray对象或 DataView 对象来操作
 
 ```
-// 创建一个8字节的ArrayBuffer  
+// 创建一个8字节的ArrayBuffer
 var b = new ArrayBuffer(8);  
   
 // 创建一个指向b的视图v1，采用Int32类型，开始于默认的字节索引0，直到缓冲区的末尾  
@@ -119,6 +118,23 @@ document.body.appendChild(a)
 ```
 页面上生成了一个超链接，点击它就能下载一个名为 a.txt 的文件，里面的内容是 Hello World!
 
+### Buffer
+在nodeJs中，我们还可以通过Buffer类进行buffer => base64的转化,base64是将二进制编码为文本的一种编码规则，将base64的值直接赋给img.src可以实现图片的展示
+
+在JavaScript中，有2个函数分别用来处理解码和编码base64 字符串：
+
+- atob() 解码通过base-64编码的字符串数据
+- btoa() 从二进制数据“字符串”创建一个base-64编码的ASCII字符串
+
+nodejs中,我们可以实现filesystem => buffer => base64的转化
+```
+function readDataAsBase64 (filepath) {
+  let buffer = fs.readFileSync(filepath)
+  let base64 = Buffer.from(buffer).toString('base64')
+  return `data:image/${ext};base64,${base64}`
+}
+```
+
 ### IndexedDB
 
 IndexedDB 就是浏览器提供的本地数据库，它可以被网页脚本创建和操作。IndexedDB 允许储存大量数据，提供查找接口，还能建立索引。
@@ -128,6 +144,7 @@ IndexedDB 就是浏览器提供的本地数据库，它可以被网页脚本创�
 `blob`对象转`file`对象，`blob`可以看成存放二进制文件的容器，因此可以将系统中的文件读取后转化成`blob`,`blob`又可以转化成`file`对象
 
 ```
+# nodejs中
 function blobToFile(filePath) {
     fs.openSync(filePath, 'w')
     
@@ -143,10 +160,11 @@ function blobToFile(filePath) {
 #### 2. filesystem => blob => dom(URL) 
 选择本地图片后预览
 ```
-<input type="file" @change="display">
+<input type="file" onChange="display(event)">
+<img id="img"/>
 
 function display(e) {
-  let img = document.createElement('img')
+  let img = document.getElementById('img')
   img.src = URL.createObjectURL(e.target.files[0])
   img.onload = function () {
     URL.revokeObjectURL(this.src)
@@ -199,7 +217,9 @@ xhr.onload = function() {
 xhr.send()
 ```
 
+
 #### 5. blob <=> indexedDB
+
 ```
 # blob => indexedDB
 store.put(blob)
@@ -218,3 +238,11 @@ worker.onmessage = function (e) {
   let blob = e.data
 }
 ```
+总结: 本文简单地介绍了跟blob相关的一些内容，只是抛砖引玉，大家有错误可以指出
+
+参考链接: 
+- https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types
+- https://developer.mozilla.org/zh-CN/docs/Web/API/Blob
+- https://www.zhangxinxu.com/wordpress/2013/10/understand-domstring-document-formdata-blob-file-arraybuffer/
+- http://es6.ruanyifeng.com/#docs/arraybuffer
+- https://scarletsky.github.io/2015/01/27/javascript-upload-slice-file-using-blob/
