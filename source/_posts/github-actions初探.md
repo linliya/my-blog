@@ -29,15 +29,13 @@ tags:
 ![](https://user-gold-cdn.xitu.io/2019/1/22/168747c6abb7dd2f?w=3584&h=1570&f=png&s=589968)
 在这个界面，我们从`workflow`拉下来一条线，下面那个就是`action`，`GitHub官方`提供了几个`action`可以让我们直接用，点击右侧的几个`action`对应的`use`按钮即可。
 
-例如我们想使用`npm`，点击`npm`对应的`use`，出现以下界面，假如我们每次`push`分支之后想执行`npm install`，在`run`对应的输入框输入`install`，那么，执行`npm install`这个`action`就写好了。
-
-![](https://user-gold-cdn.xitu.io/2019/1/22/16874890f71c1f5a?w=3576&h=1668&f=png&s=559712)
+例如我们想使用`npm`，点击`npm`对应的`use`，出现以下界面，假如我们每次`push`分支之后想执行`npm install`，在`runs`对应的输入框输入`npm install`，那么，执行`npm install`这个`action`就写好了。
 
 #### 方法二: 编写main.workflow文件
 
-在项目根目录新建`.github`文件夹，在`.github`文件夹新建`main.workflow`文件，编写完成后推送到`master`分支即可
+在项目根目录新建`.github`文件夹，在`.github`文件夹新建`main.workflow`文件，编写完成后推送到`master`分支即可。
 
-这是`GitHub Action for npm`的`main.workflow`文件:
+这是一个简单的`main.workflow`文件:
 ```
 workflow "Build, Test, and Publish" {
   on = "push"
@@ -46,7 +44,10 @@ workflow "Build, Test, and Publish" {
 
 action "Build" {
   uses = "actions/npm@master"
-  args = "install"
+  args = "install"，
+  env = {
+    LOG_FILE = "log.txt"
+  }
 }
 
 action "Test" {
@@ -54,53 +55,61 @@ action "Test" {
   uses = "actions/npm@master"
   args = "test"
 }
+
+action "Publish" {
+  needs = "Test"
+  uses = "actions/npm@master"
+  args = "publish --access public"
+  secrets = ["NPM_AUTH_TOKEN"]
+}
 ```
-其实，我们大概可以看出这段代码想要表达的意思，这里我简单介绍一下：
+其实，我们大概可以看出这段代码想要表达的意思，这里我简单介绍一下几个属性：
 
 `workflow`的属性：
-- on： 定义什么情况下会触发这个workflow，例如，push, pull_request等
-- resolves： 定义要调用的`actions`，可以是字符串或者一个字符串数组，若是只有一个字符串，表示最后调用的`action`，若是一个字符串数组，则表示完成这个`workflow`需要执行完这几个`actions`
+- on： 定义什么情况下会触发这个workflow，例如，push, pull_request等。
+- resolves： 定义要调用的`actions`，可以是字符串或者一个字符串数组，若是只有一个字符串，表示最后调用的`action`，若是一个字符串数组，则表示完成这个`workflow`需要执行完这几个`actions`。
 
 `action`的属性：
-- needs：定义执行本`action`前需要成功执行的`action`，可以是字符串或者一个字符串数组，如果`needs`的`action`不止一个，那么这些`actions`会并行执行
+- needs：定义执行本`action`前需要成功执行的`action`，可以是字符串或者一个字符串数组，如果`needs`的`action`不止一个，那么这些`actions`会并行执行。
 
-- uses：定义执行本`action`需要运行的`docker`镜像，如`uses = "node:10"`，如果不是使用`docker hub`提供的镜像，而是选择自己编写`Dockerfile`的话（后面会具体说明），这里的路径则为本地`Dockerfile`的路径
+- uses：定义执行本`action`需要运行的`docker`镜像，如`uses = "node:10"`，如果不是使用`docker hub`提供的镜像，而是选择自己编写`Dockerfile`的话（后面会具体说明），这里的路径则为本地`Dockerfile`的路径。
 
-- runs：指定在`docker`镜像中要执行的命令，若指定，则会覆盖`Dockerfile`里面的`ENTRYPOINT`，若不指定，则默认执行`Dockerfile`里面`ENTRYPOINT`的命令
+- runs：指定在`docker`镜像中要执行的命令，若指定，则会覆盖`Dockerfile`里面的`ENTRYPOINT`，若不指定，则默认执行`Dockerfile`里面`ENTRYPOINT`的命令。
 
-例如：还是用上面举的例子，我们想要在action里面执行npm install，那么只要指定: `runs: "npm install"`即可
+> 假如我们想要在action里面执行npm install，那么只要指定: `runs: "npm install"`即可。
 
-- args
-- secrets
-- env
+- args：指定要传递给`action`的参数，可以是一个字符串或者一个字符串数组，若指定，则会覆盖`Dockerfile`里面的`CMD`。
 
-具体编写教程见[官方文档](https://developer.github.com/actions/creating-workflows/workflow-configuration-options/)
+> 假如我们想要在action里面执行npm run lint，那么只要指定: `args: "run lint"`即可。
+
+- env：设置action运行时需要的环境变量，一般是自己写`Dockerfile`时会需要用到，具体说明请看[官方文档](https://developer.github.com/actions/creating-workflows/workflow-configuration-options/)。
 
 ### 3. 怎么创建一个action？
 
 #### 方法一. 使用官方提供的几个action（比较简单）
-在`github action`界面点击右侧的`actions`列表，通过点击use按钮即可使用该`action`
+在`github action`界面点击右侧的`actions`列表，通过点击use按钮使用该`action`，根据需求填写`runs`, `args`, `env`等参数即可。
 
 #### 方法二. 自己写dockerfile(自定义程度高)
-   - Dockerfile
-   - entrypoint.sh
-
-遇到的几个坑：
-npm install yarn -g ?
-
-
-npm run test 需要使用浏览器来跑单元测试，多次启动失败
-
-entrypoint.sh需要执行权限
-
-chmod +x ./actions/entrypoint.sh
-
-docker常用的命令：
+可以参考[Github actions for npm](https://github.com/actions/npm/tree/4633da3702a5366129dca9d8cc3191476fc3433c/)等官方提供的`action`源码进行编写，主要是编写以下两个文件：
 ```
-docker build -t docker-name-tag
-docker run --rm -it -v $(pwd)/:dw docker-name-tag bash
-docker ps -a
-docker rm
+ Dockerfile
+ entrypoint.sh
 ```
 
-使用xvfb-run npm test 成功解决
+## 踩坑日记
+
+### 1. entrypoint.sh需要执行权限
+通过自己写`dockerfile`的方式来创建`action`的话，需要执行以下代码，不然会出错。
+```
+chmod +x ./actions/entrypoint.sh（替换成自己项目entrypoint.sh的路径）
+```
+
+### 2. npm install yarn -g ?
+本来是想通过安装`yarn`，然后使用`yarn`来安装依赖的，但是因为容器的独立性，每个`action`都是独立的，不存在全局环境，所以无法实现，而`github`官方提供了一个公共的存储空间，`npm install`下载完成的文件就放在公共的存储空间，因此可以提供给后面的`action`使用，这也意味着如果需要在`action`之间传递信息，暂时也只能利用公共的存储空间，使用文件读写的方式来传递。
+
+### 3. npm run test需要使用浏览器来跑单元测试，启动失败
+浏览器无法直接在docker容器里面启动，使用`xvfb-run npm test` 成功解决。
+
+## 总结
+
+由于`github action`还算比较新的功能，网上的教程不是很多，以上大多是参考官方文档，加上自己摸索尝试得出的结论，如果有什么错漏之处，欢迎指出~
