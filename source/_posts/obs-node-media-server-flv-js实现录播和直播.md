@@ -14,14 +14,14 @@ tags:
 obs的下载请移步[官网](https://obsproject.com/)，有windows, mac, linux 三个平台的版本可供下载
 我这里使用的是mac版，其他版本的使用应该也差不多
 - 首先需要新建一个场景
-![新建场景.png](../../images/obs1.png)
+![新建场景.png](/images/obs1.png)
 这里有很多种场景可以使用，我用显示捕获来示范一下吧...
-![新建场景.png](../../images/obs2.png)
+![新建场景.png](/images/obs2.png)
 可以对场景进行命名，我直接使用默认的名字，点击确定
-![新建场景.png](../../images/obs3.png)
+![新建场景.png](/images/obs3.png)
 
 再次点击确定，这个时候场景就创建成功了，拖动场景可以将场景进行缩放，缩放到遮住黑色的背景就好了
-![缩放场景.png](../../images/obs4.png)
+![缩放场景.png](/images/obs4.png)
 - 推流
 视频的本质其实是一张张截下来的图片，我们需要将这一张张图片放到一个地方，然后前端就可以从这个地方读取，从而展示出来，因此在这之前我们需要开启一个服务，作为前端获取视频的源地址
 
@@ -56,7 +56,7 @@ nms.run();
 node index.js
 ```
 如果看到下面的提示，表示我们已经成功开启node-media-server服务了
-![开启服务.png](../../images/obs5.png)
+![开启服务.png](/images/obs5.png)
 
 #### flv.js
 flv.js是来自Bilibli的开源项目。它解析FLV文件喂给原生HTML5 Video标签播放音视频数据，使浏览器在不借助Flash的情况下播放FLV成为可能。具体的介绍请自行google哈，继续刚才的项目
@@ -95,10 +95,10 @@ flv.js是来自Bilibli的开源项目。它解析FLV文件喂给原生HTML5 Vide
 
 > 我们也可以通过bilibili等直播平台进行播放，这里就填写你bilibili上的直播链接和名称
 
-![image.png](../../images/obs6.png)
+![image.png](/images/obs6.png)
 
 - 点击obs的开始推流按钮
-![image.png](../../images/obs7.png)
+![image.png](/images/obs7.png)
 
 这时双击在浏览器打开index.html就可以看到直播啦，记得点击视频下方的开始按钮~
 
