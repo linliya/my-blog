@@ -198,7 +198,7 @@ async getTreeDataRecursively (path) {
 既然没法通过改变treeData的数据结构，我就翻看起了element tree的官方文档，终于找到了解决方案...
 
 
-![](https://user-gold-cdn.xitu.io/2018/10/20/1668f554c225a752?w=1734&h=116&f=png&s=36118)
+![](../../images/element-ui)
 
 我们可以官方提供的这个方法，这里的`key`就是我们的`id`(`/a/aa`), 而`value`则是dataList
 
