@@ -31,7 +31,7 @@
 
 - [用vue写一个轮播图](https://linliya.github.io/2018/04/26/vue%E7%AE%80%E6%98%93%E8%BD%AE%E6%92%AD%E5%9B%BE/)
 
-- [小程序开发日记]()
+- [小程序开发日记](https://linliya.github.io/2018/05/22/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%BC%80%E5%8F%91%E6%97%A5%E8%AE%B0/)
 
 
 
