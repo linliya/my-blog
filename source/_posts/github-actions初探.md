@@ -6,7 +6,7 @@ tags:
 ## 简单介绍
 
 `Github Actions`是`Github`推出的一个新的功能，可以为我们的项目自动化地构建工作流，例如代码检查，自动化打包，测试，发布版本等等。入口在项目`pull request`的旁边。
-![action入口](../../images/actions-header)
+![action入口](/images/actions-header)
 私有仓库现在应该很多同学都可以看到了，公有的因为现在还是beta版，名额还在陆续开放，需要主动去申请排队，有需要的同学可以[去申请一下](https://github.com/features/actions)，点击主页的`sign up for beta`即可。
 
 > 由于每个`action`都是在一个独立的`docker`容器里面运行的，所以需要我们有一点`docker`方面的知识储备，关于`docker`本文就不多加介绍了...
@@ -22,11 +22,11 @@ tags:
 
 - 点击`actions`入口，一开始我们可以看到这个界面：
 
-![创建workflow](../../images/actions-create)
+![创建workflow](/images/actions-create)
 
 - 点击上图的`create a new workflow`按钮，进入自定义`workflow`页面：
 
-![](../../images/actions-workflow)
+![](/images/actions-workflow)
 在这个界面，我们从`workflow`拉下来一条线，下面那个就是`action`，`GitHub官方`提供了几个`action`可以让我们直接用，点击右侧的几个`action`对应的`use`按钮即可。
 
 例如我们想使用`npm`，点击`npm`对应的`use`，出现以下界面，假如我们每次`push`分支之后想执行`npm install`，在`runs`对应的输入框输入`npm install`，那么，执行`npm install`这个`action`就写好了。
